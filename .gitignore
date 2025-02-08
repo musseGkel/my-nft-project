@@ -1,0 +1,28 @@
+# Node.js dependencies
+node_modules/
+package-lock.json
+
+# Environment variables (API keys, private keys)
+.env
+
+# Hardhat artifacts, cache, and builds
+artifacts/
+cache/
+typechain/
+
+# Hardhat temp files
+*.tsbuildinfo
+
+# Ethereum test network data
+*.log
+*.tmp
+
+# VS Code settings (if using VS Code)
+.vscode/
+
+# MacOS system files
+.DS_Store
+
+# Frontend build files
+nft-frontend/build/
+nft-frontend/node_modules/

@@ -1,0 +1,9 @@
+{
+  "name": "My First NFT",
+  "description": "This is an NFT from my collection.",
+  "image": "bafkreibl2t4c4erkn7kvnb4vaygfskl3kpckq6ck7btar36mjymcyibmge",
+  "attributes": [
+    { "trait_type": "Rarity", "value": "Rare" },
+    { "trait_type": "Power", "value": "100" }
+  ]
+}
