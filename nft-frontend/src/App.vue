@@ -1,12 +1,15 @@
 <template>
   <div class="container">
     <h1>Mint Your NFT</h1>
-    <button @click="connectWallet">
+    <button @click="connectWallet" :disabled="isLoading">
       {{ walletConnected ? "Wallet Connected" : "Connect Wallet" }}
     </button>
 
     <input v-model="nftURL" placeholder="Enter IPFS Metadata URL" />
-    <button @click="mintNFT">Mint NFT</button>
+    <button @click="mintNFT" :disabled="isLoading">
+      <span v-if="isLoading" class="loader"></span>
+      <span v-else>Mint NFT</span>
+    </button>
 
     <p v-if="transactionHash">
       Transaction:
@@ -28,6 +31,7 @@ export default {
     const contract = ref(null);
     const nftURL = ref("");
     const transactionHash = ref("");
+    const isLoading = ref(false); // NEW: Loading state
 
     const contractAddress = "0xD0e47518376DAD11aC29Df19000545b814e453ab"; // Replace with the new contract address
 
@@ -70,6 +74,8 @@ export default {
       if (!walletConnected.value) return alert("Connect your wallet first.");
       if (!nftURL.value) return alert("Enter a valid IPFS Metadata URL.");
 
+      isLoading.value = true; // Start loading
+
       try {
         const txn = await contract.value.mintNFT(
           await signer.value.getAddress(),
@@ -78,9 +84,23 @@ export default {
         await txn.wait();
         transactionHash.value = txn.hash;
       } catch (error) {
-        console.error("Minting failed", error);
-        alert("Minting failed. Check console for details.");
+        transactionHash.value = "";
+
+        const errorMessage =
+          error?.reason ||
+          error?.message ||
+          error?.error?.message ||
+          JSON.stringify(error);
+
+        if (error.code === -32002) {
+          alert("Please unlock MetaMask and approve the pending request.");
+        } else if (error.code === 4001) {
+          alert("User rejected action");
+        } else {
+          alert(`Minting Failed`);
+        }
       }
+      isLoading.value = false; // Stop loading
     };
 
     const transactionLink = computed(() => {
@@ -95,6 +115,7 @@ export default {
       walletConnected,
       nftURL,
       transactionHash,
+      isLoading,
       transactionLink,
     };
   },
@@ -115,5 +136,31 @@ button {
   padding: 10px;
   margin: 10px;
   cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
