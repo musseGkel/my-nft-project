@@ -5,7 +5,7 @@
       {{ walletConnected ? "Wallet Connected" : "Connect Wallet" }}
     </button>
 
-    <input v-model="nftURL" placeholder="Enter IPFS URL" />
+    <input v-model="nftURL" placeholder="Enter IPFS Metadata URL" />
     <button @click="mintNFT">Mint NFT</button>
 
     <p v-if="transactionHash">
@@ -16,9 +16,9 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { ethers } from "ethers";
-import contractABI from "./MyNFT.json"; // Store ABI in src/MyNFT.json
+import contractABI from "./MyNFT.json"; // Ensure ABI is stored here
 
 export default {
   setup() {
@@ -29,7 +29,7 @@ export default {
     const nftURL = ref("");
     const transactionHash = ref("");
 
-    const contractAddress = "0x7447a8B37De9DbE1DB89091A7066ff7ee9494e76"; // Replace with your contract address
+    const contractAddress = "0xD0e47518376DAD11aC29Df19000545b814e453ab"; // Replace with the new contract address
 
     const connectWallet = async () => {
       if (!window.ethereum) {
@@ -38,12 +38,10 @@ export default {
       }
 
       try {
-        // Request account access
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
 
-        // Create provider and signer
         const providerInstance = new ethers.BrowserProvider(window.ethereum);
         const signerInstance = await providerInstance.getSigner();
 
@@ -55,13 +53,11 @@ export default {
           signerInstance
         );
 
-        // Store connected wallet address
         walletConnected.value = true;
         alert(`Wallet Connected: ${accounts[0]}`);
       } catch (error) {
         console.error("Wallet connection failed:", error);
 
-        // Handle "Pending Request" error (code -32002)
         if (error.code === -32002) {
           alert("Please unlock MetaMask and approve the pending request.");
         } else {
@@ -72,7 +68,7 @@ export default {
 
     const mintNFT = async () => {
       if (!walletConnected.value) return alert("Connect your wallet first.");
-      if (!nftURL.value) return alert("Enter an IPFS URL.");
+      if (!nftURL.value) return alert("Enter a valid IPFS Metadata URL.");
 
       try {
         const txn = await contract.value.mintNFT(
@@ -83,8 +79,15 @@ export default {
         transactionHash.value = txn.hash;
       } catch (error) {
         console.error("Minting failed", error);
+        alert("Minting failed. Check console for details.");
       }
     };
+
+    const transactionLink = computed(() => {
+      return transactionHash.value
+        ? `https://sepolia.etherscan.io/tx/${transactionHash.value}`
+        : "#";
+    });
 
     return {
       connectWallet,
@@ -92,7 +95,7 @@ export default {
       walletConnected,
       nftURL,
       transactionHash,
-      transactionLink: `https://sepolia.etherscan.io/tx/${transactionHash.value}`,
+      transactionLink,
     };
   },
 };
