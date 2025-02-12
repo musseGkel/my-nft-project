@@ -38,7 +38,12 @@ export default {
       }
 
       try {
-        // Create provider and signer properly
+        // Request account access
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+
+        // Create provider and signer
         const providerInstance = new ethers.BrowserProvider(window.ethereum);
         const signerInstance = await providerInstance.getSigner();
 
@@ -50,17 +55,18 @@ export default {
           signerInstance
         );
 
-        // Request account access
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-
         // Store connected wallet address
         walletConnected.value = true;
         alert(`Wallet Connected: ${accounts[0]}`);
       } catch (error) {
         console.error("Wallet connection failed:", error);
-        alert(`Failed to connect wallet: ${error.message}`);
+
+        // Handle "Pending Request" error (code -32002)
+        if (error.code === -32002) {
+          alert("Please unlock MetaMask and approve the pending request.");
+        } else {
+          alert(`Failed to connect wallet: ${error.message}`);
+        }
       }
     };
 
