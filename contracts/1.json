@@ -1,0 +1,11 @@
+{
+  "name": "My First NFT",
+  "description": "This is an NFT from my collection.",
+  "image": "https://harlequin-naval-tiglon-67.mypinata.cloud/ipfs/bafkreibl2t4c4erkn7kvnb4vaygfskl3kpckq6ck7btar36mjymcyibmge",
+  "attributes": [
+    { "trait_type": "Rarity", "value": "Legendary" },
+    { "trait_type": "Background", "value": "Blue Sky" },
+    { "trait_type": "Power", "value": "Fire Breath" }
+  ],
+  "initial_price": "0.01 ETH"
+}
