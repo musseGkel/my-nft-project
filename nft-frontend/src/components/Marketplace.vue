@@ -36,28 +36,46 @@ export default {
   },
   methods: {
     async loadNFTs() {
-      this.loading = true;
-      const { signer } = await connectWallet();
-      const contract = await getContract(signer);
+      try {
+        this.loading = true;
+        const { signer } = await connectWallet();
+        const contract = await getContract(signer);
 
-      const totalSupply = await contract._tokenIds();
-      const nftsArray = [];
+        const nftEvents = await contract.queryFilter(contract.filters.Minted());
+        const nftsArray = [];
 
-      for (let i = 1; i <= totalSupply; i++) {
-        const nft = await contract.nfts(i);
-        nftsArray.push({
-          id: nft.id.toNumber(),
-          uri: nft.uri,
-          creator: nft.creator,
-          price: ethers.utils.formatEther(nft.price),
-          isListed: nft.isListed,
-          rarity: nft.rarity,
-          traits: nft.traits,
-        });
+        for (let event of nftEvents) {
+          const tokenId = Number(event.args[0]); // ✅ Convert BigInt to Number properly
+          const nft = await contract.nfts(tokenId);
+
+          if (nft.creator === "0x0000000000000000000000000000000000000000") {
+            continue;
+          }
+
+          const metadataResponse = await fetch(nft.uri);
+          const metadata = await metadataResponse.json();
+
+          nftsArray.push({
+            id: tokenId,
+            title: metadata.name,
+            image: metadata.image,
+            traits:
+              metadata.attributes.find((attr) => attr.trait_type === "Traits")
+                ?.value || "Unknown",
+            rarity:
+              metadata.attributes.find((attr) => attr.trait_type === "Rarity")
+                ?.value || "Unknown",
+            price: ethers.formatEther(nft.price),
+            isListed: nft.isListed,
+          });
+        }
+
+        this.nfts = nftsArray;
+        this.loading = false;
+      } catch (error) {
+        console.error("Error fetching NFTs:", error);
+        this.loading = false;
       }
-
-      this.nfts = nftsArray;
-      this.loading = false;
     },
     async listNFT(tokenId, price) {
       const { signer } = await connectWallet();
