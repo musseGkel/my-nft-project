@@ -4,7 +4,7 @@
     <div v-if="loading">Loading...</div>
     <div v-else class="nft-list">
       <div v-for="nft in nfts" :key="nft.id" class="nft-card">
-        <img :src="nft.uri" alt="NFT Image" />
+        <img :src="nft.image" height="100" width="100" alt="NFT Image" />
         <h3>{{ nft.title }}</h3>
         <p><strong>Rarity:</strong> {{ nft.rarity }}</p>
         <p><strong>Traits:</strong> {{ nft.traits }}</p>
@@ -23,6 +23,7 @@
 <script>
 import { connectWallet, getContract } from "../web3";
 import { ethers } from "ethers";
+import axios from "axios";
 
 export default {
   data() {
@@ -37,43 +38,87 @@ export default {
   methods: {
     async loadNFTs() {
       try {
+        console.log("🔍 Fetching NFTs...");
         this.loading = true;
-        const { signer } = await connectWallet();
-        const contract = await getContract(signer);
 
+        const { signer } = await connectWallet();
+        console.log("✅ Wallet Connected:", await signer.getAddress());
+
+        const contract = await getContract(signer);
+        console.log("✅ Smart Contract Loaded at:", contract.target);
+
+        // Fetch Minted Events
         const nftEvents = await contract.queryFilter(contract.filters.Minted());
+        console.log(`📊 Found ${nftEvents.length} Minted NFTs`);
+
         const nftsArray = [];
 
         for (let event of nftEvents) {
-          const tokenId = Number(event.args[0]); // ✅ Convert BigInt to Number properly
+          const tokenId = Number(event.args[0]); // Convert BigInt to Number
+          console.log(`🔹 Processing NFT Token ID: ${tokenId}`);
+
           const nft = await contract.nfts(tokenId);
+          console.log(`📜 NFT Data (ID: ${tokenId}):`, nft);
 
           if (nft.creator === "0x0000000000000000000000000000000000000000") {
+            console.warn(`⚠️ Skipping NFT ${tokenId} (Not Minted)`);
             continue;
           }
 
-          const metadataResponse = await fetch(nft.uri);
-          const metadata = await metadataResponse.json();
+          console.log(`🌍 Fetching Metadata from: ${nft.uri}`);
+          try {
+            const ipfsGateway =
+              "https://harlequin-naval-tiglon-67.mypinata.cloud/ipfs/";
+            const metadataURL = nft.uri.replace(
+              "https://gateway.pinata.cloud/ipfs/",
+              ipfsGateway
+            );
 
-          nftsArray.push({
-            id: tokenId,
-            title: metadata.name,
-            image: metadata.image,
-            traits:
-              metadata.attributes.find((attr) => attr.trait_type === "Traits")
-                ?.value || "Unknown",
-            rarity:
-              metadata.attributes.find((attr) => attr.trait_type === "Rarity")
-                ?.value || "Unknown",
-            price: ethers.formatEther(nft.price),
-            isListed: nft.isListed,
-          });
+            console.log(`🔄 Trying alternative IPFS Gateway: ${metadataURL}`);
+
+            const metadataResponse = await axios.get(metadataURL, {
+              headers: { Accept: "application/json" },
+            });
+
+            const metadata = metadataResponse.data;
+            console.log(`✅ Metadata Loaded for NFT ${tokenId}:`, metadata);
+
+            // Replace the default Pinata gateway in metadata image URL
+            const imageUrl = metadata.image.replace(
+              "https://gateway.pinata.cloud/ipfs/",
+              ipfsGateway
+            );
+
+            console.log(
+              `🖼️ Adjusted Image URL for NFT ${tokenId}: ${imageUrl}`
+            );
+
+            nftsArray.push({
+              id: tokenId,
+              title: metadata.name,
+              image: imageUrl,
+              traits:
+                metadata.attributes.find((attr) => attr.trait_type === "Traits")
+                  ?.value || "Unknown",
+              rarity:
+                metadata.attributes.find((attr) => attr.trait_type === "Rarity")
+                  ?.value || "Unknown",
+              price: ethers.formatEther(nft.price),
+              isListed: nft.isListed,
+            });
+          } catch (metadataError) {
+            console.error(
+              `❌ Failed to fetch metadata for NFT ${tokenId}:`,
+              metadataError
+            );
+          }
         }
 
         this.nfts = nftsArray;
         this.loading = false;
+        console.log("🎉 Successfully loaded NFTs!", this.nfts);
       } catch (error) {
-        console.error("Error fetching NFTs:", error);
+        console.error("❌ Error fetching NFTs:", error);
         this.loading = false;
       }
     },
