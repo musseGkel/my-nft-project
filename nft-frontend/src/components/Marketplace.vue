@@ -15,7 +15,10 @@
         >
           List NFT
         </button>
-        <button v-if="nft.isListed && nft.creator === userAddress">
+        <button
+          v-if="nft.isListed && nft.creator === userAddress"
+          @click="delistNFT(nft.id)"
+        >
           Delist NFT
         </button>
         <button
@@ -183,6 +186,31 @@ export default {
       await txn.wait();
       alert("NFT Purchased!");
       await this.loadNFTs();
+    },
+
+    async delistNFT(tokenId) {
+      try {
+        console.log(`Attempting to delist NFT ${tokenId}`);
+        const { signer } = await connectWallet();
+        const userAddress = await signer.getAddress();
+        const contract = await getContract(signer);
+
+        // Check ownership before delisting
+        const nftOwner = await contract.ownerOf(tokenId);
+        if (nftOwner.toLowerCase() !== userAddress.toLowerCase()) {
+          alert("You can only delist NFTs you own.");
+          return;
+        }
+
+        const txn = await contract.delistNFT(tokenId);
+        await txn.wait();
+
+        alert("NFT Delisted Successfully!");
+        await this.loadNFTs(); // Refresh marketplace
+      } catch (error) {
+        console.error(`Failed to delist NFT ${tokenId}:`, error);
+        alert("⚠️ Error delisting NFT.");
+      }
     },
   },
 };
