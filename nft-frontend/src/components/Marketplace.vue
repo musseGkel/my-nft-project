@@ -9,10 +9,19 @@
         <p><strong>Rarity:</strong> {{ nft.rarity }}</p>
         <p><strong>Traits:</strong> {{ nft.traits }}</p>
         <p><strong>Price:</strong> {{ nft.price }} ETH</p>
-        <button v-if="!nft.isListed" @click="listNFT(nft.id, nft.price)">
+        <button
+          v-if="!nft.isListed && nft.creator === userAddress"
+          @click="listNFT(nft.id, nft.price)"
+        >
           List NFT
         </button>
-        <button v-if="nft.isListed" @click="buyNFT(nft.id, nft.price)">
+        <button v-if="nft.isListed && nft.creator === userAddress">
+          Delist NFT
+        </button>
+        <button
+          v-if="nft.isListed && nft.creator !== userAddress"
+          @click="buyNFT(nft.id, nft.price)"
+        >
           Buy
         </button>
       </div>
@@ -30,6 +39,7 @@ export default {
     return {
       nfts: [],
       loading: true,
+      userAddress: null,
     };
   },
   async mounted() {
@@ -42,10 +52,11 @@ export default {
         this.loading = true;
 
         const { signer } = await connectWallet();
-        console.log("✅ Wallet Connected:", await signer.getAddress());
+        this.userAddress = await signer.getAddress(); // Fetch and store the wallet address
+        console.log("Wallet Connected:", await signer.getAddress());
 
         const contract = await getContract(signer);
-        console.log("✅ Smart Contract Loaded at:", contract.target);
+        console.log("Smart Contract Loaded at:", contract.target);
 
         // Fetch Minted Events
         const nftEvents = await contract.queryFilter(contract.filters.Minted());
@@ -105,6 +116,7 @@ export default {
                   ?.value || "Unknown",
               price: ethers.formatEther(nft.price),
               isListed: nft.isListed,
+              creator: nft.creator,
             });
           } catch (metadataError) {
             console.error(

@@ -15,7 +15,7 @@
     </main>
 
     <footer>
-      <p>Built with ❤️ using Vue & Solidity</p>
+      <p>Built By Musse</p>
     </footer>
   </div>
 </template>
