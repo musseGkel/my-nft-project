@@ -71,6 +71,16 @@ export default {
           const nft = await contract.nfts(tokenId);
           console.log(`📜 NFT Data (ID: ${tokenId}):`, nft);
 
+          // If the NFT is NOT listed and NOT owned by the current user, skip it
+          if (
+            !nft.isListed &&
+            nft.creator.toLowerCase() !== this.userAddress.toLowerCase()
+          ) {
+            console.warn(
+              `⚠️ Skipping Unlisted NFT ${tokenId} (Not Owned by User)`
+            );
+            continue;
+          }
           if (nft.creator === "0x0000000000000000000000000000000000000000") {
             console.warn(`⚠️ Skipping NFT ${tokenId} (Not Minted)`);
             continue;
@@ -157,7 +167,7 @@ export default {
         ); // Convert ETH to Wei
         await txn.wait();
 
-        alert("✅ NFT Listed Successfully!");
+        alert("NFT Listed Successfully!");
         await this.loadNFTs(); // Refresh Marketplace
       } catch (error) {
         console.error(`❌ Failed to list NFT ${tokenId}:`, error);
