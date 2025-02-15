@@ -123,15 +123,34 @@ export default {
       }
     },
     async listNFT(tokenId, price) {
-      const { signer } = await connectWallet();
-      const contract = await getContract(signer);
-      const txn = await contract.listNFT(
-        tokenId,
-        ethers.utils.parseEther(price)
-      );
-      await txn.wait();
-      alert("NFT Listed!");
-      await this.loadNFTs();
+      try {
+        console.log(`🔹 Listing NFT ${tokenId} for price:`, price);
+
+        if (!price || isNaN(price)) {
+          alert("⚠️ Price must be a valid number.");
+          return;
+        }
+
+        const { signer } = await connectWallet();
+        const contract = await getContract(signer);
+
+        console.log("✅ Calling listNFT on contract with:", {
+          tokenId,
+          price: ethers.parseEther(price.toString()),
+        });
+
+        const txn = await contract.listNFT(
+          tokenId,
+          ethers.parseEther(price.toString())
+        ); // Convert ETH to Wei
+        await txn.wait();
+
+        alert("✅ NFT Listed Successfully!");
+        await this.loadNFTs(); // Refresh Marketplace
+      } catch (error) {
+        console.error(`❌ Failed to list NFT ${tokenId}:`, error);
+        alert("⚠️ Error listing NFT.");
+      }
     },
     async buyNFT(tokenId, price) {
       const { signer } = await connectWallet();
