@@ -156,7 +156,7 @@ export default {
       const { signer } = await connectWallet();
       const contract = await getContract(signer);
       const txn = await contract.buyNFT(tokenId, {
-        value: ethers.utils.parseEther(price),
+        value: ethers.parseEther(price),
       });
       await txn.wait();
       alert("NFT Purchased!");
