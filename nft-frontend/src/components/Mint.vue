@@ -1,13 +1,26 @@
 <template>
   <div class="mint-container">
-    <h2>Mint a New NFT</h2>
-    <input v-model="nft.title" placeholder="Title" />
-    <input v-model="nft.traits" placeholder="Traits (e.g., Speed, Strength)" />
-    <input v-model="nft.rarity" placeholder="Rarity (e.g., Rare, Legendary)" />
-    <input v-model="nft.price" type="number" placeholder="Price (ETH)" />
-    <input type="file" @change="handleFileUpload" />
-    <button @click="mintNFT">Mint NFT</button>
-    <p v-if="mintStatus">{{ mintStatus }}</p>
+    <h2>🎨 Mint a New NFT</h2>
+    <input v-model="nft.title" placeholder="Title" class="input-box" />
+    <input
+      v-model="nft.traits"
+      placeholder="Traits (e.g., Speed, Strength)"
+      class="input-box"
+    />
+    <input
+      v-model="nft.rarity"
+      placeholder="Rarity (e.g., Rare, Legendary)"
+      class="input-box"
+    />
+    <input
+      v-model="nft.price"
+      type="number"
+      placeholder="Price (ETH)"
+      class="input-box"
+    />
+    <input type="file" @change="handleFileUpload" class="file-input" />
+    <button @click="mintNFT" class="mint-btn">Mint NFT</button>
+    <p v-if="mintStatus" class="status">{{ mintStatus }}</p>
   </div>
 </template>
 
@@ -148,9 +161,66 @@ export default {
 </script>
 
 <style>
+/* Centered Full-Screen Mint Section */
 .mint-container {
-  /* max-width: 450px; */
-  margin: auto;
+  max-width: 500px;
   text-align: center;
+  background: #222;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  color: #6a00ff;
+  font-size: 1.7rem;
+  margin-bottom: 15px;
+}
+
+/* Input Boxes */
+.input-box {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #6a00ff;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+}
+
+/* File Input */
+.file-input {
+  margin: 10px 0;
+  padding: 8px;
+  background: #444;
+  border-radius: 6px;
+  color: white;
+}
+
+/* Mint Button */
+.mint-btn {
+  width: 100%;
+  padding: 12px;
+  background: #6a00ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: 0.3s;
+}
+
+.mint-btn:hover {
+  background: #4e00c2;
+}
+
+/* Status Message */
+.status {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #00ff00;
 }
 </style>
