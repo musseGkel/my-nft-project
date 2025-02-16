@@ -1,22 +1,24 @@
 <template>
   <div id="app">
     <header>
-      <h1>NFT Marketplace</h1>
-      <button @click="connectWallet">{{ walletButtonText }}</button>
+      <h1 class="logo">NFT Marketplace</h1>
+      <button @click="connectWallet" class="wallet-btn">
+        {{ walletButtonText }}
+      </button>
     </header>
 
     <nav>
-      <router-link to="/">Marketplace</router-link>
-      <router-link to="/mint">Mint NFT</router-link>
+      <router-link to="/" class="nav-link">Marketplace</router-link>
+      <router-link to="/mint" class="nav-link">Mint NFT</router-link>
     </nav>
 
     <main>
       <router-view />
     </main>
 
-    <footer>
-      <p>Built By Musse</p>
-    </footer>
+    <!-- <footer>
+      <p>🚀 Built with ❤️ by Musse</p>
+    </footer> -->
   </div>
 </template>
 
@@ -33,15 +35,16 @@ export default {
   methods: {
     async connectWallet() {
       try {
-        const { signer } = await connectWallet();
-        this.walletAddress = await signer.getAddress();
-        this.walletButtonText = `Connected: ${this.walletAddress.slice(
-          0,
-          6
-        )}...${this.walletAddress.slice(-4)}`;
+        const { address } = await connectWallet();
+        if (address) {
+          this.walletAddress = address;
+          this.walletButtonText = `Connected: ${address.slice(
+            0,
+            6
+          )}...${address.slice(-4)}`;
+        }
       } catch (error) {
-        console.error(error);
-        alert("Failed to connect wallet.");
+        console.error("Error connecting wallet:", error);
       }
     },
   },
@@ -49,47 +52,91 @@ export default {
 </script>
 
 <style>
+/* Center Everything */
 #app {
+  width: 100%;
+  max-width: 600px;
   text-align: center;
-  font-family: Arial, sans-serif;
 }
 
+/* General Styling */
+body {
+  background-color: #121212;
+  color: #ffffff;
+  font-family: "Arial", sans-serif;
+  text-align: center;
+}
+
+/* Header Styling */
 header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 15px 20px;
   background: #222;
   color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
+.logo {
+  width: 100%;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+/* Wallet Button */
+.wallet-btn {
+  padding: 10px 15px;
+  background: #6a00ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s;
+}
+
+.wallet-btn:hover {
+  background: #4e00c2;
+}
+
+/* Navigation Bar */
 nav {
-  margin: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  margin-top: 10px;
 }
 
-nav a {
+.nav-link {
   margin: 0 15px;
   text-decoration: none;
-  color: #007bff;
+  color: #6a00ff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
-button {
-  padding: 10px;
-  border: none;
-  cursor: pointer;
-  background: #007bff;
-  color: white;
-  border-radius: 5px;
+.nav-link:hover {
+  color: #4e00c2;
+  text-decoration: underline;
 }
 
-button:hover {
-  background: #0056b3;
+/* Main Content */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Footer */
 footer {
-  margin-top: 30px;
+  width: 100%;
   padding: 10px;
   background: #222;
-  color: white;
+  border-radius: 10px;
 }
 </style>
