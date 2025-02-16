@@ -105,7 +105,6 @@ export default {
             });
 
             const metadata = metadataResponse.data;
-            console.log(`✅ Metadata Loaded for NFT ${tokenId}:`, metadata);
 
             // Replace the default Pinata gateway in metadata image URL
             const imageUrl = metadata.image.replace(
@@ -217,18 +216,44 @@ export default {
 </script>
 
 <style>
-.marketplace {
-  max-width: 800px;
-  margin: auto;
-}
 .nft-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit);
+  gap: 20px; /* Adds spacing between NFTs */
+  padding: 20px;
+  max-width: 1200px; /* Prevents too wide layouts */
+  margin: auto; /* Centers the NFT grid */
 }
+
 .nft-card {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin: 10px;
+  background: #222;
+  border-radius: 10px;
+  padding: 15px;
   text-align: center;
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.nft-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  background: #6a00ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #4e00c2;
 }
 </style>
