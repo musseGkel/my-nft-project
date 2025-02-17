@@ -110,20 +110,6 @@ export default {
             },
           }
         );
-        // // Upload Metadata JSON to Pinata with a custom name (e.g., "1.json")
-        // const metadataResponse = await axios.post(
-        //   "https://api.pinata.cloud/pinning/pinJSONToIPFS",
-        //   metadata,
-        //   {
-        //     headers: {
-        //       pinata_api_key: "e7924320163fdb25fb2f",
-        //       pinata_secret_api_key:
-        //         "c7f9d169d4f59dcd164ff7bcbc086eb93df8335bd0dc908d47cbaacfbbc86e65",
-        //     },
-        //     pinataMetadata: { name: `${fileName}.json` },
-        //     pinataOptions: { cidVersion: 1 },
-        //   }
-        // );
 
         return `https://gateway.pinata.cloud/ipfs/${metadataResponse.data.IpfsHash}`;
       } catch (error) {

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import contractABI from "./NFTMarketplace.json";
 
-const contractAddress = "0x243c644755928231bC1ec8DCE4167C65C65d3FFA"; // Replace with deployed contract address
+const contractAddress = "0x243c644755928231bC1ec8DCE4167C65C65d3FFA";
 
 export async function connectWallet() {
   try {
@@ -13,7 +13,7 @@ export async function connectWallet() {
     // Request account access
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    const provider = new ethers.BrowserProvider(window.ethereum); // ✅ Fixed: Use `BrowserProvider` instead of `Web3Provider`
+    const provider = new ethers.BrowserProvider(window.ethereum); // Fixed: Use `BrowserProvider` instead of `Web3Provider`
     const signer = await provider.getSigner();
     const address = await signer.getAddress();
 

@@ -10,19 +10,19 @@
         <p><strong>Traits:</strong> {{ nft.traits }}</p>
         <p><strong>Price:</strong> {{ nft.price }} ETH</p>
         <button
-          v-if="!nft.isListed && nft.creator === userAddress"
+          v-if="!nft.isListed && nft.owner === userAddress"
           @click="listNFT(nft.id, nft.price)"
         >
           List NFT
         </button>
         <button
-          v-if="nft.isListed && nft.creator === userAddress"
+          v-if="nft.isListed && nft.owner === userAddress"
           @click="delistNFT(nft.id)"
         >
           Delist NFT
         </button>
         <button
-          v-if="nft.isListed && nft.creator !== userAddress"
+          v-if="nft.isListed && nft.owner !== userAddress"
           @click="buyNFT(nft.id, nft.price)"
         >
           Buy
@@ -74,16 +74,30 @@ export default {
           const nft = await contract.nfts(tokenId);
           console.log(`📜 NFT Data (ID: ${tokenId}):`, nft);
 
-          // If the NFT is NOT listed and NOT owned by the current user, skip it
+          const currentOwner = await contract.ownerOf(tokenId); // ✅ Fetch updated owner
+
+          // ✅ Ensure the NFT is either listed or owned by the user
           if (
             !nft.isListed &&
-            nft.creator.toLowerCase() !== this.userAddress.toLowerCase()
+            currentOwner.toLowerCase() !== this.userAddress.toLowerCase()
           ) {
             console.warn(
-              `⚠️ Skipping Unlisted NFT ${tokenId} (Not Owned by User)`
+              `⚠️ Skipping NFT ${tokenId} (Not Listed & Not Owned by User)`
             );
             continue;
           }
+
+          // // If the NFT is NOT listed and NOT owned by the current user, skip it
+          // if (
+          //   !nft.isListed &&
+          //   nft.creator.toLowerCase() !== this.userAddress.toLowerCase()
+          // ) {
+          //   console.warn(
+          //     `⚠️ Skipping Unlisted NFT ${tokenId} (Not Owned by User)`
+          //   );
+          //   continue;
+          // }
+
           if (nft.creator === "0x0000000000000000000000000000000000000000") {
             console.warn(`⚠️ Skipping NFT ${tokenId} (Not Minted)`);
             continue;
@@ -129,6 +143,7 @@ export default {
               price: ethers.formatEther(nft.price),
               isListed: nft.isListed,
               creator: nft.creator,
+              owner: currentOwner,
             });
           } catch (metadataError) {
             console.error(
